@@ -1,0 +1,4 @@
+column,count,unique,top,freq
+customer_name,33038,32543,Susan Smith,5
+customer_gender,33038,2,female,16577
+customer_birthdate,32873,32852,11/03/1998 06:10 PM,2

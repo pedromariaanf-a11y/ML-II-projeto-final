@@ -1,0 +1,34 @@
+            <svg xmlns="http://www.w3.org/2000/svg" width="980" height="538" viewBox="0 0 980 538">
+              <rect width="100%" height="100%" fill="#ffffff"/>
+              <text x="32" y="42" font-family="Arial" font-size="24" font-weight="700" fill="#18202a">Mean Lifetime Spend by Category</text>
+<text x="270" y="98" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Petfood</text>
+<rect x="330" y="78" width="11.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="349.7" y="98" font-family="Arial" font-size="13" fill="#344054">336.03</text>
+<text x="270" y="138" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Videogames</text>
+<rect x="330" y="118" width="13.0" height="28" rx="4" fill="#2f6f73"/>
+<text x="351.0" y="138" font-family="Arial" font-size="13" fill="#344054">370.88</text>
+<text x="270" y="178" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Non-Alcohol Drinks</text>
+<rect x="330" y="158" width="16.2" height="28" rx="4" fill="#2f6f73"/>
+<text x="354.2" y="178" font-family="Arial" font-size="13" fill="#344054">464.35</text>
+<text x="270" y="218" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Fish</text>
+<rect x="330" y="198" width="21.2" height="28" rx="4" fill="#2f6f73"/>
+<text x="359.2" y="218" font-family="Arial" font-size="13" fill="#344054">605.85</text>
+<text x="270" y="258" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Alcohol Drinks</text>
+<rect x="330" y="238" width="21.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="359.7" y="258" font-family="Arial" font-size="13" fill="#344054">620.75</text>
+<text x="270" y="298" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Vegetables</text>
+<rect x="330" y="278" width="25.2" height="28" rx="4" fill="#2f6f73"/>
+<text x="363.2" y="298" font-family="Arial" font-size="13" fill="#344054">722.10</text>
+<text x="270" y="338" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Meat</text>
+<rect x="330" y="318" width="25.3" height="28" rx="4" fill="#2f6f73"/>
+<text x="363.3" y="338" font-family="Arial" font-size="13" fill="#344054">723.83</text>
+<text x="270" y="378" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Hygiene</text>
+<rect x="330" y="358" width="28.6" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.6" y="378" font-family="Arial" font-size="13" fill="#344054">819.00</text>
+<text x="270" y="418" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Electronics</text>
+<rect x="330" y="398" width="95.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="433.7" y="418" font-family="Arial" font-size="13" fill="#344054">2737.21</text>
+<text x="270" y="458" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">Groceries</text>
+<rect x="330" y="438" width="570.0" height="28" rx="4" fill="#2f6f73"/>
+<text x="908.0" y="458" font-family="Arial" font-size="13" fill="#344054">16306.23</text>
+            </svg>

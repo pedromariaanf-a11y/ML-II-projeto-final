@@ -1,0 +1,52 @@
+            <svg xmlns="http://www.w3.org/2000/svg" width="980" height="778" viewBox="0 0 980 778">
+              <rect width="100%" height="100%" fill="#ffffff"/>
+              <text x="32" y="42" font-family="Arial" font-size="24" font-weight="700" fill="#18202a">Raw Missing Values by Column</text>
+<text x="270" y="98" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">customer_birthdate</text>
+<rect x="330" y="78" width="7.2" height="28" rx="4" fill="#2f6f73"/>
+<text x="345.2" y="98" font-family="Arial" font-size="13" fill="#344054">0.50%</text>
+<text x="270" y="138" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">teens_home</text>
+<rect x="330" y="118" width="14.4" height="28" rx="4" fill="#2f6f73"/>
+<text x="352.4" y="138" font-family="Arial" font-size="13" fill="#344054">1.00%</text>
+<text x="270" y="178" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_alcohol_drinks</text>
+<rect x="330" y="158" width="14.4" height="28" rx="4" fill="#2f6f73"/>
+<text x="352.4" y="178" font-family="Arial" font-size="13" fill="#344054">1.00%</text>
+<text x="270" y="218" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">percentage_of_products_bought_promotion</text>
+<rect x="330" y="198" width="14.4" height="28" rx="4" fill="#2f6f73"/>
+<text x="352.4" y="218" font-family="Arial" font-size="13" fill="#344054">1.00%</text>
+<text x="270" y="258" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">kids_home</text>
+<rect x="330" y="238" width="14.4" height="28" rx="4" fill="#2f6f73"/>
+<text x="352.4" y="258" font-family="Arial" font-size="13" fill="#344054">1.00%</text>
+<text x="270" y="298" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">distinct_stores_visited</text>
+<rect x="330" y="278" width="14.4" height="28" rx="4" fill="#2f6f73"/>
+<text x="352.4" y="298" font-family="Arial" font-size="13" fill="#344054">1.00%</text>
+<text x="270" y="338" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_hygiene</text>
+<rect x="330" y="318" width="14.4" height="28" rx="4" fill="#2f6f73"/>
+<text x="352.4" y="338" font-family="Arial" font-size="13" fill="#344054">1.00%</text>
+<text x="270" y="378" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_electronics</text>
+<rect x="330" y="358" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="378" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="418" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">typical_hour</text>
+<rect x="330" y="398" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="418" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="458" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_vegetables</text>
+<rect x="330" y="438" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="458" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="498" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_videogames</text>
+<rect x="330" y="478" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="498" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="538" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_meat</text>
+<rect x="330" y="518" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="538" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="578" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">number_complaints</text>
+<rect x="330" y="558" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="578" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="618" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_petfood</text>
+<rect x="330" y="598" width="28.7" height="28" rx="4" fill="#2f6f73"/>
+<text x="366.7" y="618" font-family="Arial" font-size="13" fill="#344054">2.00%</text>
+<text x="270" y="658" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">lifetime_spend_fish</text>
+<rect x="330" y="638" width="43.1" height="28" rx="4" fill="#2f6f73"/>
+<text x="381.1" y="658" font-family="Arial" font-size="13" fill="#344054">3.00%</text>
+<text x="270" y="698" text-anchor="end" font-family="Arial" font-size="14" fill="#344054">loyalty_card_number</text>
+<rect x="330" y="678" width="570.0" height="28" rx="4" fill="#2f6f73"/>
+<text x="908.0" y="698" font-family="Arial" font-size="13" fill="#344054">39.67%</text>
+            </svg>

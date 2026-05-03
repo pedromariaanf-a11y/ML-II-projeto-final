@@ -1,0 +1,42 @@
+            <svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520">
+              <rect width="100%" height="100%" fill="#ffffff"/>
+              <text x="32" y="42" font-family="Arial" font-size="24" font-weight="700" fill="#18202a">Customer Age Distribution</text>
+<line x1="80" y1="442" x2="935" y2="442" stroke="#98a2b3" stroke-width="1"/>
+<line x1="80" y1="78" x2="80" y2="442" stroke="#98a2b3" stroke-width="1"/>
+<text x="490.0" y="496" text-anchor="middle" font-family="Arial" font-size="14" fill="#344054">Age</text>
+<text x="22" y="63" font-family="Arial" font-size="13" fill="#667085">Count</text>
+<rect x="80.0" y="118.1" width="33.6" height="323.9" fill="#6a994e"/>
+<rect x="115.6" y="91.8" width="33.6" height="350.2" fill="#6a994e"/>
+<rect x="151.2" y="196.7" width="33.6" height="245.3" fill="#6a994e"/>
+<rect x="186.9" y="78.0" width="33.6" height="364.0" fill="#6a994e"/>
+<rect x="222.5" y="206.1" width="33.6" height="235.9" fill="#6a994e"/>
+<rect x="258.1" y="108.4" width="33.6" height="333.6" fill="#6a994e"/>
+<rect x="293.8" y="96.1" width="33.6" height="345.9" fill="#6a994e"/>
+<rect x="329.4" y="226.7" width="33.6" height="215.3" fill="#6a994e"/>
+<rect x="365.0" y="106.7" width="33.6" height="335.3" fill="#6a994e"/>
+<rect x="400.6" y="227.5" width="33.6" height="214.5" fill="#6a994e"/>
+<rect x="436.2" y="111.3" width="33.6" height="330.7" fill="#6a994e"/>
+<rect x="471.9" y="191.8" width="33.6" height="250.2" fill="#6a994e"/>
+<rect x="507.5" y="128.1" width="33.6" height="313.9" fill="#6a994e"/>
+<rect x="543.1" y="112.0" width="33.6" height="330.0" fill="#6a994e"/>
+<rect x="578.8" y="232.8" width="33.6" height="209.2" fill="#6a994e"/>
+<rect x="614.4" y="88.4" width="33.6" height="353.6" fill="#6a994e"/>
+<rect x="650.0" y="220.7" width="33.6" height="221.3" fill="#6a994e"/>
+<rect x="685.6" y="101.4" width="33.6" height="340.6" fill="#6a994e"/>
+<rect x="721.2" y="103.1" width="33.6" height="338.9" fill="#6a994e"/>
+<rect x="756.9" y="230.3" width="33.6" height="211.7" fill="#6a994e"/>
+<rect x="792.5" y="105.0" width="33.6" height="337.0" fill="#6a994e"/>
+<rect x="828.1" y="223.5" width="33.6" height="218.5" fill="#6a994e"/>
+<rect x="863.8" y="109.0" width="33.6" height="333.0" fill="#6a994e"/>
+<rect x="899.4" y="178.5" width="33.6" height="263.5" fill="#6a994e"/>
+<line x1="80.0" y1="442" x2="80.0" y2="447" stroke="#98a2b3"/>
+<text x="80.0" y="466" text-anchor="middle" font-family="Arial" font-size="12" fill="#667085">24</text>
+<line x1="293.8" y1="442" x2="293.8" y2="447" stroke="#98a2b3"/>
+<text x="293.8" y="466" text-anchor="middle" font-family="Arial" font-size="12" fill="#667085">40</text>
+<line x1="507.5" y1="442" x2="507.5" y2="447" stroke="#98a2b3"/>
+<text x="507.5" y="466" text-anchor="middle" font-family="Arial" font-size="12" fill="#667085">55</text>
+<line x1="721.2" y1="442" x2="721.2" y2="447" stroke="#98a2b3"/>
+<text x="721.2" y="466" text-anchor="middle" font-family="Arial" font-size="12" fill="#667085">70</text>
+<line x1="935.0" y1="442" x2="935.0" y2="447" stroke="#98a2b3"/>
+<text x="935.0" y="466" text-anchor="middle" font-family="Arial" font-size="12" fill="#667085">86</text>
+            </svg>

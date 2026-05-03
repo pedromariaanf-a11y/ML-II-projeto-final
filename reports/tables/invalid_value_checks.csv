@@ -1,0 +1,6 @@
+check,affected_rows,action
+duplicate_customer_id,0,No action required because all ids are unique.
+duplicate_rows,0,No action required because no full-row duplicates were found.
+negative_promotion_rate,1755,"Set to missing, then median-imputed after adding an invalid-value flag."
+first_transaction_after_2026,991,"Set to missing, then median-imputed after adding an invalid-value flag."
+loyalty_card_number_missing,13106,Converted to has_loyalty_card = 0; present values converted to 1.
