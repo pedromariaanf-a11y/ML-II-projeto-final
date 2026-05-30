@@ -1,14 +1,7 @@
-"""Feature engineering utilities for customer segmentation.
-
-The functions here transform preprocessed customer and basket data into one
-row per customer. They intentionally stop before clustering.
-"""
-
-from __future__ import annotations
+"""Feature engineering functions for the customer segmentation project."""
 
 import ast
 from collections import Counter
-from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -47,43 +40,15 @@ RAW_NON_MODEL_COLUMNS = [
 ]
 
 
-# ---------------------------------------------------------------------------
-# Main feature engineering pipeline
-# ---------------------------------------------------------------------------
-
-
-def build_customer_feature_table(
-    customer_info: pd.DataFrame,
-    customer_basket: pd.DataFrame,
-    reference_date: Optional[pd.Timestamp | str] = None,
-) -> Tuple[pd.DataFrame, Dict[str, Any]]:
-    """Build the customer-level feature table used before clustering.
-
-    The important rule is row preservation: `customer_info` is the base, basket
-    features are left-joined, and customers without sampled baskets remain in
-    the table with zero basket defaults.
-    """
-    customer_features = preprocess_customer_info(customer_info, reference_date=reference_date)
-    customer_features = drop_raw_identifier_columns(customer_features, RAW_NON_MODEL_COLUMNS)
-
-    numeric_columns = [
-        column
-        for column in customer_features.select_dtypes(include=[np.number]).columns
-        if column != "customer_id"
-    ]
-    customer_features, imputation_values = handle_missing_numeric_values(
-        customer_features,
-        columns=numeric_columns,
-        strategy="median",
-        add_indicator=True,
+def build_customer_feature_table(customer_info, customer_basket, reference_date=None):
+    """Build one clean feature table with one row per customer."""
+    customer_features, imputation_values = compute_customer_features(
+        customer_info, reference_date
     )
-
-    customer_features = compute_total_lifetime_spend(customer_features)
-    customer_features = compute_spend_shares_by_category(customer_features)
-    customer_features = compute_family_features(customer_features)
 
     parsed_basket, parse_errors = parse_basket_goods(customer_basket)
     basket_features = compute_basket_features(parsed_basket)
+
     feature_table = merge_basket_features(customer_features, basket_features)
     feature_table = feature_table.sort_values("customer_id").reset_index(drop=True)
 
@@ -100,43 +65,55 @@ def build_customer_feature_table(
     return feature_table, metadata
 
 
-def compute_total_lifetime_spend(
-    customer_info: pd.DataFrame,
-    spend_columns: Optional[List[str]] = None,
-    output_column: str = "total_lifetime_spend",
-) -> pd.DataFrame:
-    """Add total spend so clusters can capture overall customer value."""
+def compute_customer_features(customer_info, reference_date=None):
+    """Create customer-level features from the full customer table."""
+    customer_features = preprocess_customer_info(customer_info, reference_date)
+    customer_features = drop_raw_identifier_columns(
+        customer_features, RAW_NON_MODEL_COLUMNS
+    )
+
+    numeric_columns = [
+        column
+        for column in customer_features.select_dtypes(include=[np.number]).columns
+        if column != "customer_id"
+    ]
+    customer_features, imputation_values = handle_missing_numeric_values(
+        customer_features,
+        columns=numeric_columns,
+        add_indicator=True,
+    )
+
+    customer_features = compute_total_lifetime_spend(customer_features)
+    customer_features = compute_spend_shares_by_category(customer_features)
+    customer_features = compute_family_features(customer_features)
+
+    return customer_features, imputation_values
+
+
+def compute_total_lifetime_spend(customer_info):
+    """Add total spend across the lifetime spend categories."""
     df = customer_info.copy()
-    columns = spend_columns or _available_spend_columns(df)
-    spend_values = df[columns].apply(pd.to_numeric, errors="coerce").fillna(0)
-    df[output_column] = spend_values.sum(axis=1)
+    spend_values = df[SPEND_COLUMNS].apply(pd.to_numeric, errors="coerce").fillna(0)
+    df["total_lifetime_spend"] = spend_values.sum(axis=1)
     return df
 
 
-def compute_spend_shares_by_category(
-    customer_info: pd.DataFrame,
-    spend_columns: Optional[List[str]] = None,
-    total_column: str = "total_lifetime_spend",
-) -> pd.DataFrame:
-    """Add spend mix features, independent of absolute spend size."""
+def compute_spend_shares_by_category(customer_info):
+    """Add the percentage of total spend represented by each category."""
     df = customer_info.copy()
-    columns = spend_columns or _available_spend_columns(df)
+    total_spend = df["total_lifetime_spend"].replace(0, np.nan)
 
-    if total_column not in df.columns:
-        df = compute_total_lifetime_spend(df, columns, total_column)
-
-    denominator = df[total_column].replace(0, np.nan)
-    for column in columns:
+    for column in SPEND_COLUMNS:
         category = column.replace("lifetime_spend_", "")
         share_column = f"spend_share_{category}"
-        df[share_column] = pd.to_numeric(df[column], errors="coerce").fillna(0) / denominator
-        df[share_column] = df[share_column].fillna(0)
+        df[share_column] = pd.to_numeric(df[column], errors="coerce").fillna(0)
+        df[share_column] = (df[share_column] / total_spend).fillna(0)
 
     return df
 
 
-def compute_family_features(customer_info: pd.DataFrame) -> pd.DataFrame:
-    """Summarize children at home as both counts and easy yes/no flags."""
+def compute_family_features(customer_info):
+    """Add simple household summaries from kids and teens at home."""
     df = customer_info.copy()
     kids = pd.to_numeric(df["kids_home"], errors="coerce").fillna(0)
     teens = pd.to_numeric(df["teens_home"], errors="coerce").fillna(0)
@@ -148,49 +125,42 @@ def compute_family_features(customer_info: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def parse_basket_goods(
-    customer_basket: pd.DataFrame,
-    goods_column: str = "list_of_goods",
-    parsed_column: str = "goods",
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Parse basket product lists while keeping malformed rows visible."""
-    parsed_goods: List[List[str]] = []
-    errors: List[Dict[str, Any]] = []
+def parse_basket_goods(customer_basket):
+    """Parse the product list string in each basket."""
+    parsed_goods = []
+    errors = []
 
-    for row_index, raw_value in customer_basket[goods_column].items():
+    for row_index, raw_value in customer_basket["list_of_goods"].items():
         goods, error = parse_list_of_goods_safely(raw_value)
         parsed_goods.append(goods)
+
         if error is not None:
-            errors.append({"row_index": row_index, "raw_value": raw_value, "error": error})
+            errors.append(
+                {"row_index": row_index, "raw_value": raw_value, "error": error}
+            )
 
     parsed_basket = customer_basket.copy()
-    parsed_basket[parsed_column] = parsed_goods
+    parsed_basket["goods"] = parsed_goods
     parsed_basket["basket_length"] = [len(goods) for goods in parsed_goods]
+
     return parsed_basket, pd.DataFrame(errors)
 
 
-def compute_basket_features(
-    parsed_basket: pd.DataFrame,
-    goods_column: str = "goods",
-) -> pd.DataFrame:
-    """Aggregate sampled basket behavior to one row per customer."""
-    rows: List[Dict[str, Any]] = []
+def compute_basket_features(parsed_basket):
+    """Aggregate sampled baskets to one row per customer."""
+    rows = []
 
     for customer_id, group in parsed_basket.groupby("customer_id", sort=False):
-        unique_products = _count_unique_products(group[goods_column])
         basket_count = int(group["invoice_id"].nunique())
+        unique_products = count_unique_products(group["goods"])
 
         rows.append(
             {
                 "customer_id": customer_id,
                 "basket_count": basket_count,
-                "avg_basket_size": float(group["basket_length"].mean())
-                if basket_count
-                else 0.0,
-                "median_basket_size": float(group["basket_length"].median())
-                if basket_count
-                else 0.0,
-                "max_basket_size": int(group["basket_length"].max()) if basket_count else 0,
+                "avg_basket_size": float(group["basket_length"].mean()),
+                "median_basket_size": float(group["basket_length"].median()),
+                "max_basket_size": int(group["basket_length"].max()),
                 "total_basket_items": int(group["basket_length"].sum()),
                 "unique_basket_products": unique_products,
                 "has_sampled_basket": 1,
@@ -200,12 +170,9 @@ def compute_basket_features(
     return pd.DataFrame(rows)
 
 
-def merge_basket_features(
-    customer_features: pd.DataFrame,
-    basket_features: pd.DataFrame,
-) -> pd.DataFrame:
-    """Left-join basket features and set no-basket customers to zero defaults."""
-    merged = customer_features.merge(basket_features, on="customer_id", how="left")
+def merge_basket_features(customer_features, basket_features):
+    """Left join basket features so customers without baskets are not dropped."""
+    feature_table = customer_features.merge(basket_features, on="customer_id", how="left")
 
     basket_defaults = {
         "basket_count": 0,
@@ -216,9 +183,9 @@ def merge_basket_features(
         "unique_basket_products": 0,
         "has_sampled_basket": 0,
     }
-    for column, default in basket_defaults.items():
-        if column in merged.columns:
-            merged[column] = merged[column].fillna(default)
+
+    for column, default_value in basket_defaults.items():
+        feature_table[column] = feature_table[column].fillna(default_value)
 
     integer_columns = [
         "basket_count",
@@ -228,34 +195,25 @@ def merge_basket_features(
         "has_sampled_basket",
     ]
     for column in integer_columns:
-        if column in merged.columns:
-            merged[column] = merged[column].astype(int)
+        feature_table[column] = feature_table[column].astype(int)
 
-    return merged
+    return feature_table
 
 
-def parse_list_of_goods_safely(value: Any) -> Tuple[List[str], Optional[str]]:
-    """Parse one `list_of_goods` value without stopping the whole pipeline."""
+def parse_list_of_goods_safely(value):
+    """Safely parse one basket string into a list of products."""
     try:
         parsed = value if isinstance(value, list) else ast.literal_eval(value)
         if not isinstance(parsed, list):
             return [], "parsed value is not a list"
         return [str(item) for item in parsed], None
-    except (SyntaxError, ValueError, TypeError) as exc:
-        return [], str(exc)
+    except (SyntaxError, ValueError, TypeError) as error:
+        return [], str(error)
 
 
-# ---------------------------------------------------------------------------
-# Implementation helpers
-# ---------------------------------------------------------------------------
-
-
-def _available_spend_columns(df: pd.DataFrame) -> List[str]:
-    return [column for column in SPEND_COLUMNS if column in df.columns]
-
-
-def _count_unique_products(goods_series: pd.Series) -> int:
-    product_counter: Counter[str] = Counter()
+def count_unique_products(goods_series):
+    """Count unique products across all baskets for one customer."""
+    product_counter = Counter()
     for goods in goods_series:
         product_counter.update(goods)
     return len(product_counter)

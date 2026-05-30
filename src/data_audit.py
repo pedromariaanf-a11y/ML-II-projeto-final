@@ -1,17 +1,14 @@
-"""Reusable audit helpers for the customer segmentation datasets."""
-
-from __future__ import annotations
+"""Simple audit helpers used by the first notebook."""
 
 import ast
 from collections import Counter
-from typing import Any, Dict, Iterable, List, Tuple
 
 import numpy as np
 import pandas as pd
 
 
-def dataframe_overview(df: pd.DataFrame) -> pd.DataFrame:
-    """Return column-level type and completeness information."""
+def dataframe_overview(df):
+    """Show column names, data types, and missing-value counts."""
     return pd.DataFrame(
         {
             "column": df.columns,
@@ -23,8 +20,8 @@ def dataframe_overview(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def missing_values(df: pd.DataFrame) -> pd.DataFrame:
-    """Summarize columns with missing values."""
+def missing_values(df):
+    """Show only the columns that have missing values."""
     summary = pd.DataFrame(
         {
             "column": df.columns,
@@ -37,10 +34,8 @@ def missing_values(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def duplicate_summary(
-    customer_info: pd.DataFrame, customer_basket: pd.DataFrame
-) -> pd.DataFrame:
-    """Report duplicate rows and duplicate key fields."""
+def duplicate_summary(customer_info, customer_basket):
+    """Check duplicate rows and duplicate IDs in both datasets."""
     rows = [
         {
             "dataset": "customer_info",
@@ -66,15 +61,20 @@ def duplicate_summary(
     return pd.DataFrame(rows)
 
 
-def validate_customer_overlap(
-    customer_info: pd.DataFrame, customer_basket: pd.DataFrame, sample_size: int = 10
-) -> Dict[str, Any]:
-    """Compare customer IDs between the customer and basket datasets."""
+def validate_customer_overlap(customer_info, customer_basket, sample_size=10):
+    """Check whether basket customers exist in the full customer table."""
     info_ids = set(customer_info["customer_id"].dropna())
     basket_ids = set(customer_basket["customer_id"].dropna())
 
     basket_ids_missing_in_info = sorted(basket_ids - info_ids)
     customers_without_baskets = sorted(info_ids - basket_ids)
+
+    if info_ids:
+        customers_without_baskets_pct = round(
+            len(customers_without_baskets) / len(info_ids) * 100, 2
+        )
+    else:
+        customers_without_baskets_pct = np.nan
 
     return {
         "customer_info_unique_customers": len(info_ids),
@@ -82,58 +82,39 @@ def validate_customer_overlap(
         "basket_ids_missing_in_info": len(basket_ids_missing_in_info),
         "sample_basket_ids_missing_in_info": basket_ids_missing_in_info[:sample_size],
         "customers_without_baskets": len(customers_without_baskets),
-        "customers_without_baskets_pct": round(
-            len(customers_without_baskets) / len(info_ids) * 100, 2
-        )
-        if info_ids
-        else np.nan,
+        "customers_without_baskets_pct": customers_without_baskets_pct,
         "sample_customers_without_baskets": customers_without_baskets[:sample_size],
     }
 
 
-def _parse_goods(value: Any) -> List[str]:
-    if isinstance(value, list):
-        parsed = value
-    else:
-        parsed = ast.literal_eval(value)
+def parse_goods_column(customer_basket):
+    """Parse the product-list strings and calculate basket length."""
+    parsed_goods = []
+    errors = []
 
-    if not isinstance(parsed, list):
-        raise ValueError("list_of_goods value is not a list")
-
-    return [str(item) for item in parsed]
-
-
-def parse_goods_column(
-    customer_basket: pd.DataFrame,
-    goods_column: str = "list_of_goods",
-    parsed_column: str = "goods",
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Parse basket product lists and add basket length."""
-    parsed_goods: List[List[str]] = []
-    errors: List[Dict[str, Any]] = []
-
-    for row_index, value in customer_basket[goods_column].items():
+    for row_index, value in customer_basket["list_of_goods"].items():
         try:
-            parsed_goods.append(_parse_goods(value))
-        except (SyntaxError, ValueError, TypeError) as exc:
+            goods = parse_one_goods_list(value)
+            parsed_goods.append(goods)
+        except (SyntaxError, ValueError, TypeError) as error:
             parsed_goods.append([])
             errors.append(
                 {
                     "row_index": row_index,
                     "raw_value": value,
-                    "error": str(exc),
+                    "error": str(error),
                 }
             )
 
     parsed_basket = customer_basket.copy()
-    parsed_basket[parsed_column] = parsed_goods
+    parsed_basket["goods"] = parsed_goods
     parsed_basket["basket_length"] = [len(goods) for goods in parsed_goods]
 
     return parsed_basket, pd.DataFrame(errors)
 
 
-def basket_length_distribution(parsed_basket: pd.DataFrame) -> pd.DataFrame:
-    """Summarize parsed basket lengths."""
+def basket_length_distribution(parsed_basket):
+    """Summarize how many products appear in each basket."""
     percentiles = [0.25, 0.5, 0.75, 0.9, 0.95, 0.99]
     return (
         parsed_basket["basket_length"]
@@ -144,42 +125,165 @@ def basket_length_distribution(parsed_basket: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def top_products(
-    parsed_basket: pd.DataFrame, goods_column: str = "goods", top_n: int = 20
-) -> pd.DataFrame:
-    """Return the most frequent products across parsed baskets."""
-    product_counts: Counter[str] = Counter()
-    for goods in parsed_basket[goods_column]:
+def top_products(parsed_basket, top_n=20):
+    """Count the most common products across all sampled baskets."""
+    product_counts = Counter()
+    for goods in parsed_basket["goods"]:
         product_counts.update(goods)
 
     total_baskets = len(parsed_basket)
-    rows = [
-        {
-            "product": product,
-            "count": count,
-            "pct_of_baskets": round(count / total_baskets * 100, 2)
-            if total_baskets
-            else np.nan,
-        }
-        for product, count in product_counts.most_common(top_n)
-    ]
+    rows = []
+    for product, count in product_counts.most_common(top_n):
+        rows.append(
+            {
+                "product": product,
+                "count": count,
+                "pct_of_baskets": round(count / total_baskets * 100, 2)
+                if total_baskets
+                else np.nan,
+            }
+        )
     return pd.DataFrame(rows)
 
 
-def _datetime_from_mixed_formats(values: pd.Series) -> pd.Series:
+def flag_suspicious_ranges(customer_info, parsed_basket=None):
+    """Flag basic values that fall outside expected ranges."""
+    issues = []
+    current_year = pd.Timestamp.today().year
+
+    add_issue(
+        issues,
+        "customer_info",
+        "customer_id",
+        "non-positive customer_id",
+        customer_info["customer_id"] <= 0,
+    )
+
+    for field in ["kids_home", "teens_home", "number_complaints", "distinct_stores_visited"]:
+        if field in customer_info:
+            add_issue(issues, "customer_info", field, "negative value", customer_info[field] < 0)
+
+    spend_columns = [
+        column for column in customer_info.columns if column.startswith("lifetime_spend_")
+    ]
+    for field in spend_columns + ["lifetime_total_distinct_products"]:
+        if field in customer_info:
+            add_issue(issues, "customer_info", field, "negative value", customer_info[field] < 0)
+
+    if "percentage_of_products_bought_promotion" in customer_info:
+        promotion_pct = customer_info["percentage_of_products_bought_promotion"]
+        add_issue(
+            issues,
+            "customer_info",
+            "percentage_of_products_bought_promotion",
+            "outside [0, 1]",
+            promotion_pct.notna() & ~promotion_pct.between(0, 1),
+        )
+
+    if "typical_hour" in customer_info:
+        typical_hour = customer_info["typical_hour"]
+        add_issue(
+            issues,
+            "customer_info",
+            "typical_hour",
+            "outside [0, 23]",
+            typical_hour.notna() & ~typical_hour.between(0, 23),
+        )
+
+    if "year_first_transaction" in customer_info:
+        first_year = customer_info["year_first_transaction"]
+        add_issue(
+            issues,
+            "customer_info",
+            "year_first_transaction",
+            "outside [1900, current_year]",
+            first_year.notna() & ~first_year.between(1900, current_year),
+        )
+
+    if "latitude" in customer_info:
+        latitude = customer_info["latitude"]
+        add_issue(
+            issues,
+            "customer_info",
+            "latitude",
+            "outside [-90, 90]",
+            latitude.notna() & ~latitude.between(-90, 90),
+        )
+
+    if "longitude" in customer_info:
+        longitude = customer_info["longitude"]
+        add_issue(
+            issues,
+            "customer_info",
+            "longitude",
+            "outside [-180, 180]",
+            longitude.notna() & ~longitude.between(-180, 180),
+        )
+
+    if "customer_birthdate" in customer_info:
+        birthdate_raw = customer_info["customer_birthdate"]
+        birthdate = parse_dates(birthdate_raw)
+        age = (pd.Timestamp.today().normalize() - birthdate).dt.days / 365.25
+        add_issue(
+            issues,
+            "customer_info",
+            "customer_birthdate",
+            "unparseable non-missing birthdate",
+            birthdate_raw.notna() & birthdate.isna(),
+        )
+        add_issue(
+            issues,
+            "customer_info",
+            "customer_birthdate",
+            "age outside [0, 110]",
+            birthdate.notna() & ~age.between(0, 110),
+        )
+
+    if parsed_basket is not None:
+        add_issue(
+            issues,
+            "customer_basket",
+            "invoice_id",
+            "non-positive invoice_id",
+            parsed_basket["invoice_id"] <= 0,
+        )
+        add_issue(
+            issues,
+            "customer_basket",
+            "customer_id",
+            "non-positive customer_id",
+            parsed_basket["customer_id"] <= 0,
+        )
+        if "basket_length" in parsed_basket:
+            add_issue(
+                issues,
+                "customer_basket",
+                "basket_length",
+                "empty basket",
+                parsed_basket["basket_length"] <= 0,
+            )
+
+    return pd.DataFrame(issues, columns=["dataset", "field", "issue", "count"])
+
+
+def parse_one_goods_list(value):
+    """Parse one `list_of_goods` value."""
+    parsed = value if isinstance(value, list) else ast.literal_eval(value)
+    if not isinstance(parsed, list):
+        raise ValueError("list_of_goods value is not a list")
+    return [str(item) for item in parsed]
+
+
+def parse_dates(values):
+    """Parse mixed date strings while staying compatible with older pandas."""
     try:
         return pd.to_datetime(values, errors="coerce", format="mixed")
     except TypeError:
         return pd.to_datetime(values, errors="coerce")
 
 
-def _append_issue(
-    issues: List[Dict[str, Any]],
-    dataset: str,
-    field: str,
-    issue: str,
-    mask: Iterable[bool],
-) -> None:
+def add_issue(issues, dataset, field, issue, mask):
+    """Append an issue row only when at least one row is affected."""
     count = int(pd.Series(mask).fillna(False).sum())
     if count > 0:
         issues.append(
@@ -190,137 +294,3 @@ def _append_issue(
                 "count": count,
             }
         )
-
-
-def flag_suspicious_ranges(
-    customer_info: pd.DataFrame, parsed_basket: pd.DataFrame | None = None
-) -> pd.DataFrame:
-    """Flag values that fall outside basic expected ranges."""
-    issues: List[Dict[str, Any]] = []
-    current_year = pd.Timestamp.today().year
-
-    _append_issue(
-        issues,
-        "customer_info",
-        "customer_id",
-        "non-positive customer_id",
-        customer_info["customer_id"] <= 0,
-    )
-
-    for field in ["kids_home", "teens_home", "number_complaints", "distinct_stores_visited"]:
-        if field in customer_info:
-            _append_issue(
-                issues,
-                "customer_info",
-                field,
-                "negative value",
-                customer_info[field] < 0,
-            )
-
-    spend_columns = [
-        column for column in customer_info.columns if column.startswith("lifetime_spend_")
-    ]
-    for field in spend_columns + ["lifetime_total_distinct_products"]:
-        if field in customer_info:
-            _append_issue(
-                issues,
-                "customer_info",
-                field,
-                "negative value",
-                customer_info[field] < 0,
-            )
-
-    if "percentage_of_products_bought_promotion" in customer_info:
-        promo = customer_info["percentage_of_products_bought_promotion"]
-        _append_issue(
-            issues,
-            "customer_info",
-            "percentage_of_products_bought_promotion",
-            "outside [0, 1]",
-            promo.notna() & ~promo.between(0, 1),
-        )
-
-    if "typical_hour" in customer_info:
-        hour = customer_info["typical_hour"]
-        _append_issue(
-            issues,
-            "customer_info",
-            "typical_hour",
-            "outside [0, 23]",
-            hour.notna() & ~hour.between(0, 23),
-        )
-
-    if "year_first_transaction" in customer_info:
-        year = customer_info["year_first_transaction"]
-        _append_issue(
-            issues,
-            "customer_info",
-            "year_first_transaction",
-            "outside [1900, current_year]",
-            year.notna() & ~year.between(1900, current_year),
-        )
-
-    if "latitude" in customer_info:
-        latitude = customer_info["latitude"]
-        _append_issue(
-            issues,
-            "customer_info",
-            "latitude",
-            "outside [-90, 90]",
-            latitude.notna() & ~latitude.between(-90, 90),
-        )
-
-    if "longitude" in customer_info:
-        longitude = customer_info["longitude"]
-        _append_issue(
-            issues,
-            "customer_info",
-            "longitude",
-            "outside [-180, 180]",
-            longitude.notna() & ~longitude.between(-180, 180),
-        )
-
-    if "customer_birthdate" in customer_info:
-        birthdate_raw = customer_info["customer_birthdate"]
-        birthdate = _datetime_from_mixed_formats(birthdate_raw)
-        age = (pd.Timestamp.today().normalize() - birthdate).dt.days / 365.25
-        _append_issue(
-            issues,
-            "customer_info",
-            "customer_birthdate",
-            "unparseable non-missing birthdate",
-            birthdate_raw.notna() & birthdate.isna(),
-        )
-        _append_issue(
-            issues,
-            "customer_info",
-            "customer_birthdate",
-            "age outside [0, 110]",
-            birthdate.notna() & ~age.between(0, 110),
-        )
-
-    if parsed_basket is not None:
-        _append_issue(
-            issues,
-            "customer_basket",
-            "invoice_id",
-            "non-positive invoice_id",
-            parsed_basket["invoice_id"] <= 0,
-        )
-        _append_issue(
-            issues,
-            "customer_basket",
-            "customer_id",
-            "non-positive customer_id",
-            parsed_basket["customer_id"] <= 0,
-        )
-        if "basket_length" in parsed_basket:
-            _append_issue(
-                issues,
-                "customer_basket",
-                "basket_length",
-                "empty basket",
-                parsed_basket["basket_length"] <= 0,
-            )
-
-    return pd.DataFrame(issues, columns=["dataset", "field", "issue", "count"])

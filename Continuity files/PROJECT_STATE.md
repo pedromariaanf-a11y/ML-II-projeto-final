@@ -53,6 +53,17 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - Added clearer docstrings explaining why each main function exists.
 - Preserved the existing preprocessing and feature-engineering results.
 
+## Academic-Style Simplification Completed
+
+- Simplified `src/data_loading.py`, `src/data_audit.py`, `src/preprocessing.py`, and `src/features.py` to look more like a notebook-based academic data science project.
+- Removed advanced type-hinting style and unnecessary typing imports from the active audit, preprocessing, and feature-engineering modules.
+- Removed notebook helper type hints that made the notebooks look more production-oriented than necessary.
+- Kept the main workflow functions easy to explain: `preprocess_customer_info`, `compute_customer_features`, `compute_basket_features`, `merge_basket_features`, and `build_customer_feature_table`.
+- Reduced helper-function complexity while keeping small helpers that make the notebook and source code easier to follow.
+- Kept the notebook as the main explanation layer for defense preparation.
+- Preserved the existing 33,038 x 73 feature table results.
+- Added a small `.gitignore` to keep future Python cache, notebook checkpoint, virtual environment, and generated output files out of version control.
+
 ## Feature Table Status
 
 - Feature table shape remains unchanged at 33,038 rows x 73 columns.
