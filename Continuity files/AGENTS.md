@@ -12,11 +12,13 @@ Create a reproducible customer segmentation project with clean code, interpretab
 - Use relative repository paths only; do not hardcode local absolute paths.
 - Ensure all customers in `customer_info.csv` are considered in the final clustering deliverable.
 - Treat basket-derived features as optional inputs because some customers do not appear in `customer_basket.csv`.
-- Update `PROJECT_STATE.md` after meaningful project milestones.
+- Keep continuity documents together in `Continuity files/`.
+- Keep raw assignment/data inputs together in `Project files/`.
+- Update `Continuity files/PROJECT_STATE.md` after meaningful project milestones.
 
 ## Coding Conventions
 
 - Prefer small, testable functions.
 - Use deterministic random seeds when modeling is introduced.
 - Separate data loading, audit/preprocessing, modeling, and reporting concerns.
-- Create `DECISIONS.md` or `EXPERIMENT_LOG.md` only if they add clear value.
+- Create `Continuity files/DECISIONS.md` or an experiment log only if they add clear value.
