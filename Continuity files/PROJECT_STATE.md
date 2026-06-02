@@ -2,11 +2,12 @@
 
 ## Current State
 
-The repository now has three completed project phases:
+The repository now has four completed project phases:
 
 1. Initial repository setup and raw data audit.
 2. Initial preprocessing and customer-level feature engineering.
 3. Readability and defense-preparation refactor of the preprocessing workflow.
+4. EDA and feature review before clustering.
 
 The current pipeline builds an in-memory feature table for future clustering. It preserves every customer from `customer_info.csv`, adds optional basket-derived behavior features from `customer_basket.csv`, and does not train clustering models or create final cluster outputs.
 
@@ -65,6 +66,22 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - Updated the feature table from 33,038 x 73 to 33,038 x 77 after adding academic degree prefix features.
 - Added a small `.gitignore` to keep future Python cache, notebook checkpoint, virtual environment, and generated output files out of version control.
 
+## EDA And Feature Review Completed
+
+- Added `notebooks/03_eda_feature_review.ipynb` as the next project phase before clustering.
+- The notebook uses `REFERENCE_DATE = "2026-05-30"` when rebuilding the feature table so age and tenure are reproducible.
+- The notebook validates that the feature table has 33,038 rows x 77 columns, unique `customer_id`, no missing values, no raw `customer_name`, and all four degree features.
+- The notebook reviews demographic, household, spend, basket, loyalty, complaints, promotion, degree, outlier, skewness, and correlation patterns.
+- Refined the correlation/redundancy review with a readable high-correlation feature-pair table and interpretation thresholds.
+- Added a manual redundancy decision table explaining which groups should be modeled, profiled, or excluded before clustering.
+- Defined two explicit baseline modeling feature sets:
+  - `model_features_a_no_basket`: 20 customer-info-derived features with no basket features.
+  - `model_features_b_with_basket`: 24 features that add `has_sampled_basket`, `basket_count`, `avg_basket_size`, and `unique_basket_products`.
+- Defined `profiling_features` for interpretation and `excluded_features` for row keys/raw identifiers.
+- Added optional matplotlib plots for readability; the notebook still relies mainly on simple tables.
+- No clustering model was trained.
+- No final customer-cluster CSV was created.
+
 ## Feature Table Status
 
 - Feature table shape is now 33,038 rows x 77 columns.
@@ -120,11 +137,11 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 
 ## Current Task
 
-Review the preprocessing feature table and understand which engineered features should be considered for modeling.
+Review the refined EDA and feature review notebook, then approve or adjust the two baseline feature sets before clustering.
 
 ## Next Recommended Task
 
-Conduct a feature review before clustering: select candidate modeling features, decide which quality flags should be included, choose scaling/transformation rules, and document the reasoning before training any clustering model.
+Create a clustering preparation notebook that uses the approved baseline feature set, applies log/scaling transformations, and only then trains a first baseline clustering model.
 
 ## Known Issues
 

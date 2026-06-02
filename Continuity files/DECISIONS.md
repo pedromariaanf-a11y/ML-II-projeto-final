@@ -72,6 +72,16 @@ Alternatives considered: Encode names or loyalty card numbers directly.
 
 Impact: The feature table remains focused on interpretable customer attributes and behavior.
 
+## 2026-06-02 - Extract Academic Degree Indicators From Customer Name Prefix
+
+Decision: Extract `degree_bsc`, `degree_msc`, `degree_phd`, and `degree_unknown` from the prefix of `customer_name`, while keeping the raw `customer_name` excluded from the feature table.
+
+Reason: The assignment states that customer name contains degree-level information. The raw name is not appropriate for modeling, but the degree prefix is a clear, interpretable signal that can be reviewed as a candidate modeling or profiling feature.
+
+Alternatives considered: Drop `customer_name` without preserving the degree signal, or encode the raw name directly.
+
+Impact: The feature table keeps the useful academic degree signal as simple numeric flags without adding raw names to the modeling data.
+
 ## 2026-05-30 - Delay Clustering Until After Feature Review
 
 Decision: Do not train clustering models during the preprocessing and feature-engineering phase.
