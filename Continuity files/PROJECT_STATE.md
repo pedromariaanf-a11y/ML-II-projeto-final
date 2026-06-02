@@ -2,14 +2,15 @@
 
 ## Current State
 
-The repository now has four completed project phases:
+The repository now has five completed project phases:
 
 1. Initial repository setup and raw data audit.
 2. Initial preprocessing and customer-level feature engineering.
 3. Readability and defense-preparation refactor of the preprocessing workflow.
 4. EDA and feature review before clustering.
+5. Baseline K-Means clustering experiments.
 
-The current pipeline builds an in-memory feature table for future clustering. It preserves every customer from `customer_info.csv`, adds optional basket-derived behavior features from `customer_basket.csv`, and does not train clustering models or create final cluster outputs.
+The current pipeline builds an in-memory feature table, compares baseline K-Means clustering options, and preserves every customer from `customer_info.csv`. No final model has been selected and no final customer-cluster CSV has been created.
 
 Continuity documents now live together in `Continuity files/`. Raw datasets and the assignment PDF now live together in `Project files/`. The data loading code supports this layout.
 
@@ -83,6 +84,19 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - No clustering model was trained.
 - No final customer-cluster CSV was created.
 
+## Baseline Clustering Completed
+
+- Added `notebooks/04_baseline_clustering.ipynb` as the first baseline clustering notebook.
+- Added `scikit-learn>=1.3` to `requirements.txt` for K-Means, scaling, and silhouette scoring.
+- The notebook rebuilds the feature table with `REFERENCE_DATE = "2026-05-30"` and validates the same 33,038 rows x 77 columns.
+- K-Means was tested with `RANDOM_STATE = 42` for `k = 2` through `k = 10`.
+- Baseline A was evaluated with 20 customer-info-derived features and no basket features.
+- Baseline B was evaluated with 23 features: Baseline A plus `has_sampled_basket`, `basket_count`, and `avg_basket_size`.
+- For each feature set and `k`, the notebook records inertia, silhouette score, cluster counts, smallest/largest cluster size, and smallest/largest cluster percentage.
+- Cluster-size summaries and preliminary interpretation checks were added for promising candidates.
+- No final clustering model has been selected.
+- No final customer-cluster CSV was created.
+
 ## Feature Table Status
 
 - Feature table shape is now 33,038 rows x 77 columns.
@@ -92,7 +106,7 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - 4,911 customers have `basket_count = 0`, `avg_basket_size = 0`, and `unique_basket_products = 0`.
 - No missing values remain after preprocessing.
 - Raw `customer_name` remains excluded from the feature table, but its academic degree prefix is preserved as clean numeric flags.
-- No clustering has been performed.
+- Baseline clustering experiments have been performed, but no final clustering model has been selected.
 - No final customer segment CSV has been created.
 - No report or application has been created.
 
@@ -138,15 +152,15 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 
 ## Current Task
 
-Review the refined EDA and feature review notebook, then approve or adjust the two baseline feature sets before clustering.
+Review the baseline clustering results and identify a small number of candidate configurations for interpretation.
 
 ## Next Recommended Task
 
-Create a clustering preparation notebook that uses the approved baseline feature set, applies log/scaling transformations, and only then trains a first baseline clustering model.
+Interpret the most promising baseline clustering candidates, compare Baseline A versus Baseline B, and decide whether one configuration should move toward final segmentation.
 
 ## Known Issues
 
-- No clustering workflow exists yet.
+- No final clustering workflow exists yet.
 - No final customer-cluster CSV exists yet.
 - No report or application exists yet.
-- Modeling feature selection and scaling decisions still need to be made.
+- A final model-selection decision still needs to be made.
