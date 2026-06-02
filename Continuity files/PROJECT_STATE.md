@@ -2,15 +2,16 @@
 
 ## Current State
 
-The repository now has five completed project phases:
+The repository now has six completed project phases:
 
 1. Initial repository setup and raw data audit.
 2. Initial preprocessing and customer-level feature engineering.
 3. Readability and defense-preparation refactor of the preprocessing workflow.
 4. EDA and feature review before clustering.
 5. Baseline K-Means clustering experiments.
+6. Candidate cluster profiling and interpretability review.
 
-The current pipeline builds an in-memory feature table, compares baseline K-Means clustering options, and preserves every customer from `customer_info.csv`. No final model has been selected and no final customer-cluster CSV has been created.
+The current pipeline builds an in-memory feature table, compares baseline K-Means clustering options, profiles selected candidate solutions, and preserves every customer from `customer_info.csv`. No final model has been selected and no final customer-cluster CSV has been created.
 
 Continuity documents now live together in `Continuity files/`. Raw datasets and the assignment PDF now live together in `Project files/`. The data loading code supports this layout.
 
@@ -97,6 +98,18 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - No final clustering model has been selected.
 - No final customer-cluster CSV was created.
 
+## Candidate Cluster Profiling Completed
+
+- Added `src/modeling.py` with small reusable modeling utilities for transformations, scaling, K-Means labels, in-memory cluster labels, cluster sizes, cluster profiles, and comparisons with global averages.
+- Added `notebooks/05_candidate_cluster_profiling.ipynb` to profile selected K-Means candidate solutions before final model selection.
+- The notebook rebuilds the feature table with `REFERENCE_DATE = "2026-05-30"` and validates the same 33,038 rows x 77 columns.
+- Profiled five candidate solutions: Baseline A with `k = 2`, `k = 4`, and `k = 6`; Baseline B with `k = 4` and `k = 6`.
+- Cluster size summaries, cluster profile tables, differences from global averages, and strongest distinguishing features were created in memory.
+- Added basket availability diagnostics for Baseline B candidates to check whether clusters are too basket-driven.
+- The notebook recommends `A_k4` or `A_k6`, plus `B_k4` if basket diagnostics remain interpretable, as candidates to investigate further.
+- No final clustering model has been selected.
+- No final customer-cluster CSV was created.
+
 ## Feature Table Status
 
 - Feature table shape is now 33,038 rows x 77 columns.
@@ -106,7 +119,7 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - 4,911 customers have `basket_count = 0`, `avg_basket_size = 0`, and `unique_basket_products = 0`.
 - No missing values remain after preprocessing.
 - Raw `customer_name` remains excluded from the feature table, but its academic degree prefix is preserved as clean numeric flags.
-- Baseline clustering experiments have been performed, but no final clustering model has been selected.
+- Baseline clustering experiments and candidate profiling have been performed, but no final clustering model has been selected.
 - No final customer segment CSV has been created.
 - No report or application has been created.
 
@@ -152,11 +165,11 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 
 ## Current Task
 
-Review the baseline clustering results and identify a small number of candidate configurations for interpretation.
+Review the candidate cluster profiling notebook and decide which candidate solution should move toward final model selection.
 
 ## Next Recommended Task
 
-Interpret the most promising baseline clustering candidates, compare Baseline A versus Baseline B, and decide whether one configuration should move toward final segmentation.
+Select one candidate configuration for final validation, document the reasoning, and only then create the final customer-cluster output.
 
 ## Known Issues
 
