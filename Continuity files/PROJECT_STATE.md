@@ -31,6 +31,7 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
   - deriving `customer_age`,
   - deriving `customer_tenure_years`,
   - creating `has_loyalty_card`,
+  - extracting academic degree indicators from the `customer_name` prefix,
   - flagging missing/invalid date and tenure values,
   - clipping suspicious promotion percentages into `promotion_pct_clean`,
   - preserving suspicious promotion/year signals as explicit flags,
@@ -61,24 +62,25 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - Kept the main workflow functions easy to explain: `preprocess_customer_info`, `compute_customer_features`, `compute_basket_features`, `merge_basket_features`, and `build_customer_feature_table`.
 - Reduced helper-function complexity while keeping small helpers that make the notebook and source code easier to follow.
 - Kept the notebook as the main explanation layer for defense preparation.
-- Preserved the existing 33,038 x 73 feature table results.
+- Updated the feature table from 33,038 x 73 to 33,038 x 77 after adding academic degree prefix features.
 - Added a small `.gitignore` to keep future Python cache, notebook checkpoint, virtual environment, and generated output files out of version control.
 
 ## Feature Table Status
 
-- Feature table shape remains unchanged at 33,038 rows x 73 columns.
+- Feature table shape is now 33,038 rows x 77 columns.
 - One row is present for every one of the 33,038 customers in `customer_info.csv`.
 - `customer_id` remains unique.
 - Customers without sampled baskets are retained.
 - 4,911 customers have `basket_count = 0`, `avg_basket_size = 0`, and `unique_basket_products = 0`.
 - No missing values remain after preprocessing.
+- Raw `customer_name` remains excluded from the feature table, but its academic degree prefix is preserved as clean numeric flags.
 - No clustering has been performed.
 - No final customer segment CSV has been created.
 - No report or application has been created.
 
 ## Key Features Created
 
-- Demographic: `customer_age`, gender indicator features.
+- Demographic: `customer_age`, gender indicator features, degree prefix indicator features.
 - Tenure: `customer_tenure_years`, first-transaction quality flags.
 - Loyalty and complaints: `has_loyalty_card`, `loyalty_card_missing`, `number_complaints`.
 - Promotion: `promotion_pct_clean`, `promotion_pct_suspicious`, `promotion_pct_missing`.
@@ -97,6 +99,7 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - `loyalty_card_number` has 13,106 missing values (39.67%).
 - The audit flagged 1,755 promotion percentages outside `[0, 1]`; these are currently clipped to 0 or 1 and flagged.
 - The audit flagged 991 first-transaction years outside `[1900, current_year]`; these are currently treated as invalid for tenure and flagged.
+- Academic degree prefix features currently identify 5,154 BSc customers, 5,057 MSc customers, 5,096 PhD customers, and 17,731 customers without one of those known prefixes.
 
 ## Unresolved Data Quality Decisions
 

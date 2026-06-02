@@ -24,6 +24,7 @@ def preprocess_customer_info(customer_info, reference_date=None):
     df = create_has_loyalty_card(df)
     df = handle_suspicious_promotion_percentages(df)
     df = add_gender_features(df)
+    df = add_degree_features(df)
     return df
 
 
@@ -104,6 +105,19 @@ def add_gender_features(customer_info):
     df["gender_female"] = (gender == "female").astype(int)
     df["gender_male"] = (gender == "male").astype(int)
     df["gender_unknown"] = (~gender.isin(["female", "male"])).astype(int)
+    return df
+
+
+def add_degree_features(customer_info):
+    """Create simple degree indicators from the name prefix."""
+    df = customer_info.copy()
+    name = df["customer_name"].astype("string").str.lower().str.strip()
+
+    df["degree_bsc"] = name.str.startswith("bsc.").fillna(False).astype(int)
+    df["degree_msc"] = name.str.startswith("msc.").fillna(False).astype(int)
+    df["degree_phd"] = name.str.startswith("phd.").fillna(False).astype(int)
+    known_degree_count = df[["degree_bsc", "degree_msc", "degree_phd"]].sum(axis=1)
+    df["degree_unknown"] = (known_degree_count == 0).astype(int)
     return df
 
 
