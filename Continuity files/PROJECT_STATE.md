@@ -76,8 +76,9 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - Added a manual redundancy decision table explaining which groups should be modeled, profiled, or excluded before clustering.
 - Defined two explicit baseline modeling feature sets:
   - `model_features_a_no_basket`: 20 customer-info-derived features with no basket features.
-  - `model_features_b_with_basket`: 24 features that add `has_sampled_basket`, `basket_count`, `avg_basket_size`, and `unique_basket_products`.
+  - `model_features_b_with_basket`: 23 features that add only `has_sampled_basket`, `basket_count`, and `avg_basket_size`.
 - Defined `profiling_features` for interpretation and `excluded_features` for row keys/raw identifiers.
+- Kept `unique_basket_products` as profiling/sensitivity for now because it is highly correlated with `basket_count`.
 - Added optional matplotlib plots for readability; the notebook still relies mainly on simple tables.
 - No clustering model was trained.
 - No final customer-cluster CSV was created.
