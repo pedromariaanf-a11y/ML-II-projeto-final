@@ -2,7 +2,7 @@
 
 ## Current State
 
-The repository now has six completed project phases:
+The repository now has six completed project phases plus a consistency/methodology review:
 
 1. Initial repository setup and raw data audit.
 2. Initial preprocessing and customer-level feature engineering.
@@ -13,7 +13,7 @@ The repository now has six completed project phases:
 
 The current pipeline builds an in-memory feature table, compares baseline K-Means clustering options, profiles selected candidate solutions, and preserves every customer from `customer_info.csv`. No final model has been selected and no final customer-cluster CSV has been created.
 
-Continuity documents now live together in `Continuity files/`. Raw datasets and the assignment PDF now live together in `Project files/`. The data loading code supports this layout.
+Continuity documents now live together in `Continuity files/`. Raw datasets and the assignment PDF now live together in `Project files/`. The data loading code now prefers this layout and raises an error if duplicate raw CSV copies are found in both the repository root and `Project files/`.
 
 ## Completed Setup
 
@@ -26,6 +26,7 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - Organized continuity documents under `Continuity files/`.
 - Organized raw project inputs under `Project files/`.
 - Updated data loading and notebooks to find raw data in `Project files/`.
+- Added duplicate raw-file protection in `src/data_loading.py` so accidental copies in both locations are caught early.
 
 ## Preprocessing Work Completed
 
@@ -47,6 +48,7 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
   - customer-level basket aggregates,
   - left-joining basket features onto the full customer base.
 - Added `notebooks/02_preprocessing_features.ipynb` to build and validate the customer-level feature table.
+- Updated the preprocessing notebook to use the fixed `REFERENCE_DATE = "2026-05-30"` so age and tenure are reproducible.
 
 ## Readability And Defense Refactor Completed
 
@@ -80,7 +82,9 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
   - `model_features_a_no_basket`: 20 customer-info-derived features with no basket features.
   - `model_features_b_with_basket`: 23 features that add only `has_sampled_basket`, `basket_count`, and `avg_basket_size`.
 - Defined `profiling_features` for interpretation and `excluded_features` for row keys/raw identifiers.
+- `excluded_features` now explicitly documents raw fields removed before modeling, including `customer_name`, birthdate fields, loyalty-card number, original promotion percentage, `list_of_goods`, and raw lifetime spend amount columns.
 - Kept `unique_basket_products` as profiling/sensitivity for now because it is highly correlated with `basket_count`.
+- Corrected the spend-amount review so `lifetime_spend_*_was_missing` flags are not accidentally treated as raw spend amount columns.
 - Added optional matplotlib plots for readability; the notebook still relies mainly on simple tables.
 - No clustering model was trained.
 - No final customer-cluster CSV was created.
@@ -105,10 +109,21 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 - The notebook rebuilds the feature table with `REFERENCE_DATE = "2026-05-30"` and validates the same 33,038 rows x 77 columns.
 - Profiled five candidate solutions: Baseline A with `k = 2`, `k = 4`, and `k = 6`; Baseline B with `k = 4` and `k = 6`.
 - Cluster size summaries, cluster profile tables, differences from global averages, and strongest distinguishing features were created in memory.
+- Strongest distinguishing features are now ranked by standardized difference from the global average, so raw-unit variables such as euros, counts, percentages, and binary flags are not compared unfairly.
 - Added basket availability diagnostics for Baseline B candidates to check whether clusters are too basket-driven.
-- The notebook recommends `A_k4` or `A_k6`, plus `B_k4` if basket diagnostics remain interpretable, as candidates to investigate further.
+- The notebook now keeps `B_k4` as a diagnostic/sensitivity candidate because basket availability can drive the solution. The primary candidates to investigate further are `A_k4` and `A_k6`.
 - No final clustering model has been selected.
 - No final customer-cluster CSV was created.
+
+## Consistency And Methodology Review Completed
+
+- Moved `customer_info.csv` and `customer_basket.csv` from the repository root into `Project files/` without changing their contents.
+- Verified the moved CSV hashes remained unchanged.
+- Confirmed the loader prefers `Project files/` and raises a duplicate-file error in a controlled test.
+- Revalidated `notebooks/02_preprocessing_features.ipynb` and `notebooks/03_eda_feature_review.ipynb` in memory without training clustering models.
+- Validated that the feature table remains 33,038 rows x 77 columns, `customer_id` is unique, no missing values remain, `customer_name` is excluded, degree flags are present, and no final clustering CSV exists.
+- Statically validated `notebooks/05_candidate_cluster_profiling.ipynb` without executing clustering: code cells compile, standardized-difference logic is present, and Baseline B is documented as diagnostic/sensitivity only.
+- Updated `README.md` to match the current project structure and phase status.
 
 ## Feature Table Status
 
@@ -165,11 +180,11 @@ Continuity documents now live together in `Continuity files/`. Raw datasets and 
 
 ## Current Task
 
-Review the candidate cluster profiling notebook and decide which candidate solution should move toward final model selection.
+Consistency and methodology issues before final model selection have been reviewed and corrected. No new clustering model was trained during this review.
 
 ## Next Recommended Task
 
-Select one candidate configuration for final validation, document the reasoning, and only then create the final customer-cluster output.
+Review `A_k4` and `A_k6` as the primary final-model candidates, document the final selection reasoning, and only then create the final customer-cluster output.
 
 ## Known Issues
 

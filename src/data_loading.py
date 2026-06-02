@@ -19,16 +19,22 @@ def resolve_data_file(filename, root=None):
     """Find a raw data file in the current project layout."""
     base = Path(root) if root is not None else project_root()
 
-    possible_paths = [
-        base / filename,
-        base / PROJECT_FILES_DIR / filename,
-    ]
+    project_files_path = base / PROJECT_FILES_DIR / filename
+    root_path = base / filename
 
-    for path in possible_paths:
-        if path.exists():
-            return path
+    if project_files_path.exists() and root_path.exists():
+        raise ValueError(
+            f"Duplicate raw data file found for {filename}. "
+            f"Remove one copy: {project_files_path} or {root_path}."
+        )
 
-    checked_paths = ", ".join(str(path) for path in possible_paths)
+    if project_files_path.exists():
+        return project_files_path
+
+    if root_path.exists():
+        return root_path
+
+    checked_paths = ", ".join([str(project_files_path), str(root_path)])
     raise FileNotFoundError(f"Could not find {filename}. Checked: {checked_paths}")
 
 
